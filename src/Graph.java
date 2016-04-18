@@ -1,57 +1,18 @@
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
-public class Graph {
-	
-	private static Scanner scanner;
-	private int _numVertices;
-	private int _numEdges;
-	private List<Edge> _edges = new ArrayList<Edge>();
-	
-	public Graph(int numVertices, int numEdges) {
-		_numVertices = numVertices;
-		_numEdges = numEdges;
-	}
-	
-	public int getNumVertices() {
-		return _numVertices;
-	}
-	
-	public void setNumVertices(int numVertices) {
-		_numVertices = numVertices;
-	}
-	
-	public int getNumEdges() {
-		return _numEdges;
-	}
-	
-	public void setNumEdges(int numEdges) {
-		_numEdges = numEdges;
-	}
-	
-	public Edge getEdge(int index) {
-		return _edges.get(index);
-	}
-	
-	public void setEdge(List<Edge> edges) {
-		_edges = edges;
-	}
-	
-	public void addEdge(Edge edge) {
-		_edges.add(edge);
-	}
-	
-	public class Edge {
-		private int _src;
-		private int _dest;
-		private int _weight;
+public class Graph
+{
+    public class Edge {
+    	
+        private int _src;
+        private int _dest;
+        private int _weight;
 
-		public Edge(int src, int dest, int weight) {
-			_src = src;
-			_dest = dest;
-			_weight = weight;
-		}
+        public Edge() {
+            _src = 0;
+            _dest = 0;
+            _weight = 0;
+        }
 
 		public int getSrc() {
 			return _src;
@@ -76,25 +37,65 @@ public class Graph {
 		public void setWeight(int weight) {
 			_weight = weight;
 		}
+        
+        
+    }
+ 
+    private int _vertices;
+    private int _edges;
+    private static Edge _edge[];
+ 
+    public Graph(int v, int e)
+    {
+        _vertices = v;
+        _edges = e;
+        _edge = new Edge[e];
+        
+        for (int i=0; i<e; ++i){
+        	_edge[i] = new Edge();
+        }
+    }
+ 
+    public int getVertices() {
+		return _vertices;
+	}
 
+	public void setVertices(int vertices) {
+		_vertices = vertices;
+	}
+
+	public int getEdges() {
+		return _edges;
+	}
+
+	public void setEdges(int edges) {
+		_edges = edges;
+	}
+
+	public static Edge getEdge(int index) {
+		return _edge[index];
+	}
+
+	public void setEdge(Edge[] edge) {
+		_edge = edge;
 	}
 	
-	public int[] BellmanFord(int src, int[] totalDist)
-	{
-		int numVertices = getNumVertices();
-		int numEdges = getNumVertices();
-		int[] dist = new int[numVertices];
-		
-		for (int i = 0; i < numVertices; i++){
-			dist[i] = Integer.MAX_VALUE;
-		}
-		dist[src] = 0;
-		
-		for (int i = 0; i < numVertices - 1; i++)
-		{
-			for (int j = 0; j < numEdges; j++)
-			{
-				Edge edge = getEdge(j);
+	public void bellmanFord(int src, int[] totalDist)
+    {
+        int vertices = getVertices();
+		int edges = getEdges();
+        int dist[] = new int[vertices];
+ 
+        for (int i=0; i<vertices; ++i) {
+        	dist[i] = Integer.MAX_VALUE;
+        }
+        dist[src] = 0;
+ 
+        for (int i=1; i<vertices; ++i)
+        {
+            for (int j=0; j<edges; ++j)
+            {
+            	Edge edge = getEdge(j);
 				int u = edge.getSrc();
 				int v = edge.getDest();
 				int weight = edge.getWeight();
@@ -106,57 +107,53 @@ public class Graph {
 						totalDist[v] = dist[v];
 					}
 				}
-			}
-		}
-		return dist;
-		
-	}
+            }
+        }
+ 
+       
+        printArr(dist, vertices);
+    }
+ 
+    public void printArr(int dist[], int V)
+    {
+        System.out.println("Vertex   Distance from Source");
+        for (int i=0; i<V; ++i)
+            System.out.println(i+"\t\t"+dist[i]);
+    }
+ 
+    public static void main(String[] args)
+    {
 
-	public static void main(String[] args) {
-		
-		scanner = new Scanner(System.in);		
-		String[] input = scanner.nextLine().split(" ");
-		int n = Integer.parseInt(input[0]);
-		int f = Integer.parseInt(input[1]);
-		int c = Integer.parseInt(input[2]);
-		int[][] allDists = new int[f][1];
-		String[] subsidiaries = scanner.nextLine().split(" ");
-		
-		Graph graph = new Graph(n, c);
-		int i=0;
-		while(i < c) {
-			String[] edge = scanner.nextLine().split(" ");
-			int src = Integer.parseInt(edge[0]);
-			int dest = Integer.parseInt(edge[1]);
-			int weight = Integer.parseInt(edge[2]);
-			Edge newEdge = graph.new Edge(src-1, dest-1, weight);
-			graph.addEdge(newEdge);
-			
-			i++;
-		}
-		
-		int[] totalDist = new int[n];
+
+        Scanner scanner = new Scanner(System.in);       
+        String[] input = scanner.nextLine().split(" ");
+        String[] subsidiaries = scanner.nextLine().split(" ");
+
+        int V = Integer.parseInt(input[0]);
+        int f = Integer.parseInt(input[1]);
+        int E = Integer.parseInt(input[2]);
+
+        Graph graph = new Graph(V, E);
+
+        for(int i = 0; i < E; i++) {
+            String[] input2 = scanner.nextLine().split(" ");
+            int u = Integer.parseInt(input2[0]);
+            int v = Integer.parseInt(input2[1]);
+            int w = Integer.parseInt(input2[2]);
+            Edge edge = getEdge(i);
+            edge.setSrc(u-1);
+            edge.setDest(v-1);
+            edge.setWeight(w);
+        }
+        
+        int[] totalDist = new int[V];
 		for(int t : totalDist) {
 			totalDist[t] = Integer.MAX_VALUE; 
 		}
-		
-		int y = 0;
-		for(String s : subsidiaries) {
-			int subsidiary = Integer.parseInt(s);
-			allDists[y] = graph.BellmanFord(subsidiary, totalDist);
-			y++;
-		}
-		
-		int value = 0;
-		for(int z = 0; z < n ; z++) {
-			if(totalDist[z] < value) {
-				value = z;
-			}
-		}
-		System.out.println("value: " + value+1);
-		
-		
 
-	}
-
+        for(int i = 0; i < f; i++) {
+            int subsidiary = Integer.parseInt(subsidiaries[i]);
+            graph.bellmanFord(subsidiary-1, totalDist);
+        }
+    }
 }
