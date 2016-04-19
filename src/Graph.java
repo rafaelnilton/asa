@@ -174,6 +174,7 @@ public class Graph
             for (int i = 0; i < f; i++) {
                 System.out.print(allDist[i][meetPoint] + " ");
             }
+            System.out.println();
         }
         else System.out.println("N");
     }
