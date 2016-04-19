@@ -1,170 +1,105 @@
-import java.util.Scanner;
+// A Java program for Bellman-Ford's single source shortest path
+// algorithm.
+import java.util.*;
+import java.lang.*;
+import java.io.*;
 
+// A class to represent a connected, directed and weighted graph
 public class Graph
 {
+    // A class to represent a weighted edge in graph
     public class Edge {
-    	
-        private int _src;
-        private int _dest;
-        private int _weight;
-
-        public Edge() {
-            _src = 0;
-            _dest = 0;
-            _weight = 0;
+        int src, dest, weight;
+        Edge() {
+            src = dest = weight = 0;
         }
-
-		public int getSrc() {
-			return _src;
-		}
-
-		public void setSrc(int src) {
-			_src = src;
-		}
-
-		public int getDest() {
-			return _dest;
-		}
-
-		public void setDest(int dest) {
-			_dest = dest;
-		}
-
-		public int getWeight() {
-			return _weight;
-		}
-
-		public void setWeight(int weight) {
-			_weight = weight;
-		}
-        
-        
+    };
+ 
+    int V, E;
+    Edge edge[];
+ 
+    // Creates a graph with V vertices and E edges
+    Graph(int v, int e)
+    {
+        V = v;
+        E = e;
+        edge = new Edge[e];
+        for (int i=0; i<e; ++i)
+            edge[i] = new Edge();
     }
  
-    private int _vertices;
-    private int _edges;
-    private static Edge _edge[];
- 
-    public Graph(int v, int e)
+    // The main function that finds shortest distances from src
+    // to all other vertices using Bellman-Ford algorithm.  The
+    // function also detects negative weight cycle
+    void BellmanFord(Graph graph,int src)
     {
-        _vertices = v;
-        _edges = e;
-        _edge = new Edge[e];
-        
-        for (int i=0; i<e; ++i){
-        	_edge[i] = new Edge();
-        }
-    }
+        int V = graph.V, E = graph.E;
+        int dist[] = new int[V];
  
-    public int getVertices() {
-		return _vertices;
-	}
-
-	public void setVertices(int vertices) {
-		_vertices = vertices;
-	}
-
-	public int getEdges() {
-		return _edges;
-	}
-
-	public void setEdges(int edges) {
-		_edges = edges;
-	}
-
-	public static Edge getEdge(int index) {
-		return _edge[index];
-	}
-
-	public void setEdge(Edge[] edge) {
-		_edge = edge;
-	}
-	
-	public int[] bellmanFord(int src, int[] totalDist)
-    {
-        int vertices = getVertices();
-		int edges = getEdges();
-        int dist[] = new int[vertices];
- 
-        for (int i=0; i<vertices; ++i) {
-        	dist[i] = Integer.MAX_VALUE;
-        }
+        // Step 1: Initialize distances from src to all other
+        // vertices as INFINITE
+        for (int i=0; i<V; ++i)
+            dist[i] = Integer.MAX_VALUE;
         dist[src] = 0;
  
-        for (int i=1; i<vertices; ++i)
+        // Step 2: Relax all edges |V| - 1 times. A simple
+        // shortest path from src to any other vertex can
+        // have at-most |V| - 1 edges
+        for (int i=1; i<V; ++i)
         {
-            for (int j=0; j<edges; ++j)
+            for (int j=0; j<E; ++j)
             {
-            	Edge edge = getEdge(j);
-				int u = edge.getSrc();
-				int v = edge.getDest();
-				int weight = edge.getWeight();
-				if (dist[u] != Integer.MAX_VALUE && dist[u] + weight < dist[v]){
-					dist[v] = dist[u] + weight;
-				}
+                int u = graph.edge[j].src;
+                int v = graph.edge[j].dest;
+                int weight = graph.edge[j].weight;
+                if (dist[u]!=Integer.MAX_VALUE && dist[u]+weight<dist[v])
+                    dist[v]=dist[u]+weight;
             }
         }
  
-        printArr(dist, vertices);
-        return dist;
+       
+        printArr(dist, V);
     }
  
-    public void printArr(int dist[], int V)
+    // A utility function used to print the solution
+    void printArr(int dist[], int V)
     {
-        System.out.println("Vertex Distance from Source");
-        for (int i=0; i<V; ++i){
+        System.out.println("Vertex   Distance from Source");
+        for (int i=0; i<V; ++i)
             System.out.println(i+"\t\t"+dist[i]);
-        }
     }
  
+    // Driver method to test above function
     public static void main(String[] args)
     {
+
+        //* reads input
         Scanner scanner = new Scanner(System.in);       
         String[] input = scanner.nextLine().split(" ");
         String[] subsidiaries = scanner.nextLine().split(" ");
 
+        //* creates the graph
         int V = Integer.parseInt(input[0]);
         int f = Integer.parseInt(input[1]);
         int E = Integer.parseInt(input[2]);
 
         Graph graph = new Graph(V, E);
 
+        //* adds the edges
         for(int i = 0; i < E; i++) {
             String[] input2 = scanner.nextLine().split(" ");
             int u = Integer.parseInt(input2[0]);
             int v = Integer.parseInt(input2[1]);
             int w = Integer.parseInt(input2[2]);
-            Edge edge = getEdge(i);
-            edge.setSrc(u-1);
-            edge.setDest(v-1);
-            edge.setWeight(w);
+            graph.edge[i].src = u-1;
+            graph.edge[i].dest = v-1;
+            graph.edge[i].weight = w;
         }
-        
-        int[][] allDist = new int[f][1];
-        int[] totalDist = new int[V];
-		for(int i = 0; i < V; i++) {
-			totalDist[i] = Integer.MAX_VALUE; 
-		}
 
+        //* calls BellmanFord for each subsidiary
         for(int i = 0; i < f; i++) {
             int subsidiary = Integer.parseInt(subsidiaries[i]);
-            allDist[i] = graph.bellmanFord(subsidiary-1, totalDist);
+            graph.BellmanFord(graph, subsidiary-1);
         }
-        
-        for (int i = 0; i < V; i++) {
-        	for(int y = 0; y < f; y++) {
-        		if(totalDist[i] != Integer.MAX_VALUE){
-            		totalDist[i] += allDist[y][i];
-				} else {
-	        		totalDist[i] = allDist[y][i];
-				}
-        	}
-        } 
-		int value = 0;
-		for(int z = 0; z < V ; z++) {
-			System.out.println("Total: " + totalDist[z]);
-		}
-		System.out.println("value: " + (value+1) + " " + totalDist[value]);
-        
     }
 }
