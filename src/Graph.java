@@ -80,7 +80,7 @@ public class Graph
 		_edge = edge;
 	}
 	
-	public void bellmanFord(int src, int[] totalDist)
+	public int[] bellmanFord(int src, int[] totalDist)
     {
         int vertices = getVertices();
 		int edges = getEdges();
@@ -101,30 +101,24 @@ public class Graph
 				int weight = edge.getWeight();
 				if (dist[u] != Integer.MAX_VALUE && dist[u] + weight < dist[v]){
 					dist[v] = dist[u] + weight;
-					if(totalDist[v] != Integer.MAX_VALUE){
-						totalDist[v] += dist[v];
-					} else {
-						totalDist[v] = dist[v];
-					}
 				}
             }
         }
  
-       
         printArr(dist, vertices);
+        return dist;
     }
  
     public void printArr(int dist[], int V)
     {
-        System.out.println("Vertex   Distance from Source");
-        for (int i=0; i<V; ++i)
+        System.out.println("Vertex Distance from Source");
+        for (int i=0; i<V; ++i){
             System.out.println(i+"\t\t"+dist[i]);
+        }
     }
  
     public static void main(String[] args)
     {
-
-
         Scanner scanner = new Scanner(System.in);       
         String[] input = scanner.nextLine().split(" ");
         String[] subsidiaries = scanner.nextLine().split(" ");
@@ -146,14 +140,31 @@ public class Graph
             edge.setWeight(w);
         }
         
+        int[][] allDist = new int[f][1];
         int[] totalDist = new int[V];
-		for(int t : totalDist) {
-			totalDist[t] = Integer.MAX_VALUE; 
+		for(int i = 0; i < V; i++) {
+			totalDist[i] = Integer.MAX_VALUE; 
 		}
 
         for(int i = 0; i < f; i++) {
             int subsidiary = Integer.parseInt(subsidiaries[i]);
-            graph.bellmanFord(subsidiary-1, totalDist);
+            allDist[i] = graph.bellmanFord(subsidiary-1, totalDist);
         }
+        
+        for (int i = 0; i < V; i++) {
+        	for(int y = 0; y < f; y++) {
+        		if(totalDist[i] != Integer.MAX_VALUE){
+            		totalDist[i] += allDist[y][i];
+				} else {
+	        		totalDist[i] = allDist[y][i];
+				}
+        	}
+        } 
+		int value = 0;
+		for(int z = 0; z < V ; z++) {
+			System.out.println("Total: " + totalDist[z]);
+		}
+		System.out.println("value: " + (value+1) + " " + totalDist[value]);
+        
     }
 }
