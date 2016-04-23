@@ -8,129 +8,129 @@
 *****************************************************/
 
 #include <iostream> 
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <limits.h>
 #include <vector>
 
 using namespace std;
  
-struct Edge
-{
-    short src, dest, weight;
+struct Edge {
+    int src;
+    int dest;
+    int weight;
 };
  
-struct Graph
-{
-    short V, E;
- 
-    struct Edge* edge;
+struct Graph {
+    int V;
+    int E; 
+    struct Edge* edges;
 };
  
-struct Graph* createGraph(short V, short E)
-{
-    struct Graph* graph = (struct Graph*) malloc( sizeof(struct Graph) );
-    graph->V = V;
-    graph->E = E;
- 
-    graph->edge = (struct Edge*) malloc( graph->E * sizeof( struct Edge ) );
- 
-    return graph;
-}
- 
+vector<int> bellmanFord(struct Graph* graph, int src) {
+    int V = graph->V;
+    int E = graph->E;
+    vector<int> dist(V);
 
-vector<short> bellmanFord(struct Graph* graph, short src)
-{
-    short V = graph->V;
-    short E = graph->E;
-    vector<short> dist(V);
-
-    for (short i = 0; i < V; i++)
-        dist[i]   = SHRT_MAX;
+    for (int i = 0; i < V; i++) 
+        dist[i] = INT_MAX;
+    
     dist[src] = 0;
  
-    for (short i = 1; i <= V-1; i++)
-    {
-        for (short j = 0; j < E; j++)
-        {
-            short u = graph->edge[j].src;
-            short v = graph->edge[j].dest;
-            short weight = graph->edge[j].weight;
-            if (dist[u] != SHRT_MAX && dist[u] + weight < dist[v])
+    for (int i = 0; i < V-1; i++) {
+        bool changes = false;
+        for (int e = 0; e < E; e++) {
+            int u = graph->edges[e].src;
+            int v = graph->edges[e].dest;
+            int weight = graph->edges[e].weight;
+            if (dist[u] != INT_MAX && dist[u] + weight < dist[v]) {
                 dist[v] = dist[u] + weight;
+                changes = true;
+            }
         }
+        if (!changes) break;
     }
- 
-        return dist;
+
+    return dist;
 }
  
-int main()
-{
-    short V, f, E, subsidiary, u, v, w;
+int main() {
+    int V, F, E, subsidiary, u, v, w;
 
-// BEGINNING - READS INPUT 
+/****** BEGINNING - READS INPUT ******/
     cin >> V;
-    cin >> f;
+    cin >> F;
     cin >> E;
 
-    struct Graph* graph = createGraph(V, E);
+    struct Graph* graph = (struct Graph*) malloc(sizeof(struct Graph));
+    graph->V = V;
+    graph->E = E;
+    graph->edges = (struct Edge*) malloc(graph->E * sizeof(struct Edge));
 
-    vector<short> subsidiaries(f);
-    for (short i = 0; i < f; i++) {
+
+    vector<int> subsidiaries(F);
+
+    for (int i = 0; i < F; i++) {
         cin >> subsidiary;
         subsidiaries[i] = subsidiary-1;
     }
 
-    for(short i = 0; i < E; i++) {
+    for(int i = 0; i < E; i++) {
         cin >> u;
         cin >> v;
         cin >> w;
 
-        graph->edge[i].src = u-1;
-        graph->edge[i].dest = v-1;
-        graph->edge[i].weight = w;
+        graph->edges[i].src = u-1;
+        graph->edges[i].dest = v-1;
+        graph->edges[i].weight = w;
     }
-// END - READS INPUT 
-    vector< vector<short> > allDist(f, vector<short>(1));
-    vector<short> totalDist(V);
-    for(short i = 0; i < V; i++) {
-        totalDist[i] = SHRT_MAX; 
+/****** END - READS INPUT  ******/
+
+
+    vector< vector<int> > allDist(F, vector<int>(1));
+    vector<int> totalDist(V);
+
+    for(int i = 0; i < V; i++) {
+        totalDist[i] = INT_MAX; 
     }
     
-    for (short i = 0; i < f; i++) {
+    for (int i = 0; i < F; i++) {
         allDist[i] = bellmanFord(graph, subsidiaries[i]);
     }
-// BEGINNING - PROCESS OUTPUT
-    for (short i = 0; i < V; i++) {
-        for(short y = 0; y < f; y++) {
-            if (allDist[y][i] == SHRT_MAX) {
-                totalDist[i] = SHRT_MAX;
+
+
+/****** BEGINNING - PROCESS OUTPUT ******/
+    for (int i = 0; i < V; i++) {
+        for(int y = 0; y < F; y++) {
+            if (allDist[y][i] == INT_MAX) {
+                totalDist[i] = INT_MAX;
                 break;
             }
-            else if(totalDist[i] != SHRT_MAX) 
+            else if(totalDist[i] != INT_MAX) 
                 totalDist[i] += allDist[y][i];
             else 
                 totalDist[i] = allDist[y][i];
         }
     } 
 
-    short meetPoint = 0;
-    for(short i = 0; i < V ; i++) {
-        if(totalDist[i] < totalDist[meetPoint]) meetPoint = i;
-    }
-    short meetPointDist = totalDist[meetPoint];
-    
-    if (meetPointDist != SHRT_MAX) {
-        cout << (meetPoint + 1) << " " << meetPointDist << endl; // meeting poshort and respective total loss
+    int meetPoint = 0;
 
-        for (short i = 0; i < f; i++) {
+    for(int i = 0; i < V ; i++) {
+        if(totalDist[i] < totalDist[meetPoint]) 
+            meetPoint = i;
+    }
+
+    int meetPointDist = totalDist[meetPoint];
+    
+    if (meetPointDist != INT_MAX) {
+        cout << (meetPoint + 1) << " " << meetPointDist << endl;
+
+        for (int i = 0; i < F; i++) {
             cout << allDist[i][meetPoint] << " ";
         }
         cout << endl;
     }
     else cout << "N" << endl;
-// END - PROCESS OUTPUT
+/****** END - PROCESS OUTPUT ******/
 
     return 0;
 }
